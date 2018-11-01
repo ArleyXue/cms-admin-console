@@ -1,0 +1,7 @@
+POST http://localhost:8081/cms-admin-console/api/login/login HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
+
+userName=aaa
+&password=111
+
+###

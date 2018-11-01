@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.arley.cms.console.mapper.SysPermissionMapper" >
+
+    <resultMap id="BaseResultMap" type="com.arley.cms.console.pojo.Do.SysPermissionDO" >
+        <id column="permission_id" property="permissionId" />
+        <result column="menu_name" property="menuName" />
+        <result column="parent_id" property="parentId" />
+        <result column="menu_url" property="menuUrl" />
+        <result column="menu_code" property="menuCode" />
+        <result column="menu_icon" property="menuIcon" />
+        <result column="menu_priority" property="menuPriority" />
+        <result column="menu_state" property="menuState" />
+        <result column="menu_type" property="menuType" />
+        <result column="modifier" property="modifier" />
+        <result column="gmt_modified" property="gmtModified" />
+        <result column="gmt_create" property="gmtCreate" />
+        <collection property="permissionList" column="permission_id" ofType="com.arley.cms.console.pojo.Do.SysPermissionDO" select="listPermissionByParentId">
+        </collection >
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+        p.permission_id,
+        p.menu_name,
+        p.parent_id,
+        p.menu_url,
+        p.menu_code,
+        p.menu_icon,
+        p.menu_priority,
+        p.menu_state,
+        p.menu_type,
+        p.modifier,
+        p.gmt_modified,
+        p.gmt_create
+    </sql>
+
+
+    <select id="listHavePermission" resultType="com.arley.cms.console.pojo.Do.SysPermissionDO" parameterType="int">
+        SELECT
+            <include refid="Base_Column_List"/>
+        from
+            sys_user_role ur
+            LEFT JOIN sys_role r on ur.role_id = r.role_id
+            LEFT JOIN sys_role_permission rp on rp.role_id = r.role_id
+            LEFT JOIN sys_permission p on rp.permission_id = p.permission_id
+        WHERE
+            ur.user_id = #{userId}
+    </select>
+
+    <select id="listHaveHierarchyPermission" resultMap="BaseResultMap">
+        SELECT
+            <include refid="Base_Column_List"/>
+        from
+            sys_permission p
+        WHERE
+            p.parent_id is null
+        order by p.menu_priority
+    </select>
+
+    <select id="listPermissionByParentId" resultMap="BaseResultMap">
+        SELECT
+            <include refid="Base_Column_List"/>
+        from
+            sys_permission p
+        where
+            p.parent_id = #{permissionId}
+        order by p.menu_priority
+    </select>
+
+    <select id="listPermissionByRoleId" resultType="com.arley.cms.console.pojo.Do.SysPermissionDO">
+        select
+          <include refid="Base_Column_List"/>
+        from
+          sys_permission p
+          LEFT JOIN sys_role_permission rp on rp.permission_id = p.permission_id
+        where
+          rp.role_id = #{roleId}
+        order by p.menu_priority
+    </select>
+</mapper>
