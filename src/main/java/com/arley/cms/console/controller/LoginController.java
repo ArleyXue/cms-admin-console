@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author XueXianlei
@@ -46,8 +48,9 @@ public class LoginController {
             throw new CustomException(PublicCodeEnum.PARAM_ERROR.getCode(), "用户名或密码错误", CustomException.LOGGER_WARN_TYPE);
         }
 
-        AnswerBody body = AnswerBody.buildAnswerBody();
-
+        Map<String, String> token = new HashMap<>();
+        token.put("token", "1111111dfasdfasdfasdfsad1111");
+        AnswerBody body = AnswerBody.buildAnswerBody(token);
         // 保存登录日志
         LoginLogVO loginLog = new LoginLogVO();
         loginLog.setUserName(userName);
