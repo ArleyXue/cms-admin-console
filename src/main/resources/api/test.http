@@ -1,7 +1,11 @@
-POST http://localhost:8081/cms-admin-console/api/login/login HTTP/1.1
+POST http://localhost:8081/cms-admin-console/api/user/login HTTP/1.1
 Content-Type: application/x-www-form-urlencoded
 
 userName=admin
 &password=111
+
+###
+POST http://localhost:8081/cms-admin-console/api/user/getUserInfo HTTP/1.1
+Content-Type: application/x-www-form-urlencoded
 
 ###

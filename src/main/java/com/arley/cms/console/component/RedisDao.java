@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Component
@@ -423,6 +424,10 @@ public class RedisDao {
         return redisTemplate.hasKey(key);
     }
 
+    public Set<String> keys(String key) {
+        return redisTemplate.keys(key);
+    }
+
     /**
      * 批量删除对应的value
      * @param keys 可变参数
@@ -431,6 +436,13 @@ public class RedisDao {
         for (String key : keys) {
             delete(key);
         }
+    }
+    /**
+     * 批量删除对应的value
+     * @param keys 可变参数
+     */
+    public void delete(Set<String> keys) {
+        redisTemplate.delete(keys);
     }
     /**
      * 删除对应的value

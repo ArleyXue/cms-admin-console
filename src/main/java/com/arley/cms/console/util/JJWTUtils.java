@@ -25,7 +25,7 @@ public class JJWTUtils {
 
     private static final String key_prefix = "jwt";
 
-    public static String createJWT(String id, String subject, long ttlMillis) {
+    public static String createJWT(String subject, long ttlMillis) {
         // 指定签名的时候使用的签名算法，也就是header那部分，jjwt已经将这部分内容封装好了。
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
         // 生成jwt的时间
@@ -37,7 +37,7 @@ public class JJWTUtils {
         //下面就是在为payload添加各种标准声明和私有声明了
         JwtBuilder builder = Jwts.builder() //这里其实就是new一个JwtBuilder，设置jwt的body
                // .setClaims(claims)          //如果有私有声明，一定要先设置这个自己创建的私有的声明，这个是给builder的claim赋值，一旦写在标准的声明赋值之后，就是覆盖了那些标准的声明的
-                .setId(id)                  //设置jti(JWT ID)：是JWT的唯一标识，根据业务需要，这个可以设置为一个不重复的值，主要用来作为一次性token,从而回避重放攻击。
+                .setId(UUID.randomUUID().toString())                  //设置jti(JWT ID)：是JWT的唯一标识，根据业务需要，这个可以设置为一个不重复的值，主要用来作为一次性token,从而回避重放攻击。
                 .setIssuedAt(now)           //iat: jwt的签发时间
                 .setSubject(subject)        //sub(Subject)：代表这个JWT的主体，即它的所有人，这个是一个json格式的字符串，可以存放什么userid，roldid之类的，作为什么用户的唯一标志。
                 .signWith(signatureAlgorithm, key);//设置签名使用的签名算法和签名使用的秘钥
@@ -76,17 +76,19 @@ public class JJWTUtils {
 
 
     public static void main(String[] args) {
-        String id = UUID.randomUUID().toString();
+        /*String id = UUID.randomUUID().toString();
         Map<String, Object> data = new HashMap<>();
         data.put("userId", "1234444444");
         data.put("name", "2323ss2");
-        String abc = createJWT(id, JSON.toJSONString(data), -1);
-        System.out.println(abc);
+        String abc = createJWT(JSON.toJSONString(data), -1);
+        System.out.println(abc);*/
 
-        Claims abc1 = parseJWT(abc);
+        Claims abc1 = parseJWT("eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJkMzE4M2JlNC03YzE2LTRkMzQtYWU3Mi1kNmE5YjU3MjBjMjEiLCJpYXQiOjE1NDExNDI2MDYsInN1YiI6IntcIm5hbWVcIjpcIkFybGV5XCIsXCJ1c2VySWRcIjoxLFwidXNlck5hbWVcIjpcImFkbWluXCJ9In0.w-RRiyqYQr1cW1UCzaEb6NaiBXloswSmsNhXzW2FUUc");
         String subject = abc1.getSubject();
         Map<String, Object> map = JSON.parseObject(subject, Map.class);
         System.out.println(map);
+
+
 
     }
 }

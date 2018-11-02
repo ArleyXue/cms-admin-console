@@ -1,7 +1,10 @@
 package com.arley.cms.console.interceptor;
 
 
+import com.arley.cms.console.constant.PublicCodeEnum;
+import com.arley.cms.console.util.AnswerBody;
 import com.arley.cms.console.util.CommonUtils;
+import com.arley.cms.console.util.FastJsonUtils;
 import com.arley.cms.console.util.RequestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -70,6 +73,12 @@ public class ApiLogFilter extends OncePerRequestFilter {
         Long startTime = (Long) request.getAttribute("inTime");
         long time = System.currentTimeMillis() - startTime;
         int status = response.getStatus();
+        if (404 == status) {
+            response.setStatus(200);
+            response.resetBuffer();
+            message = FastJsonUtils.obj2Str(AnswerBody.buildAnswerBody(PublicCodeEnum.SERVICE_NOT_EXIST));
+        }
+
         // 输出接口访问日志
         logger.info("【接口访问日志】请求路径={} | 来源IP={} | 请求参数={} | 响应参数={} | 处理时间={}ms",
                 url,
