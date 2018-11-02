@@ -1,6 +1,7 @@
 package com.arley.cms.console.shiro;
 
 import com.arley.cms.console.constant.PublicConstants;
+import com.arley.cms.console.exception.CustomException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
 
@@ -42,7 +43,6 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
     @Override
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
         HttpServletRequest requestWrapper = (HttpServletRequest) request;
-        System.out.println(requestWrapper.getRequestURI());
         String token = requestWrapper.getHeader(PublicConstants.REQUEST_HEADER_TOKEN_NAME);;
         //判断请求的请求头是否带上 "Token"
         if (StringUtils.isNotBlank(token)) {

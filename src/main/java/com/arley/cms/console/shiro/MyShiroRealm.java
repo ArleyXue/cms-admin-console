@@ -1,6 +1,8 @@
 package com.arley.cms.console.shiro;
 
 import com.arley.cms.console.component.RedisDao;
+import com.arley.cms.console.constant.PublicCodeEnum;
+import com.arley.cms.console.exception.CustomException;
 import com.arley.cms.console.pojo.vo.AdminTokenVO;
 import com.arley.cms.console.pojo.vo.SysUserVO;
 import com.arley.cms.console.service.SysUserService;
@@ -8,6 +10,7 @@ import com.arley.cms.console.util.FastJsonUtils;
 import com.arley.cms.console.util.JJWTUtils;
 import com.arley.cms.console.util.RedisKeyUtils;
 import io.jsonwebtoken.Claims;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -76,7 +79,6 @@ public class MyShiroRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken auth) throws AuthenticationException {
-        System.out.println("认证");
         String token = (String) auth.getCredentials();
         // 解密获得account，用于和数据库进行对比
         Claims claims = JJWTUtils.parseJWT(token);
@@ -85,13 +87,17 @@ public class MyShiroRealm extends AuthorizingRealm {
         // 查询用户是否存在
 
         if (sysUserVO == null) {
-            throw new AuthenticationException("该帐号不存在(The account does not exist.)");
+            throw new CustomException(PublicCodeEnum.FAIL.getCode(), "账号不存在!", CustomException.LOGGER_WARN_TYPE);
         }
         // 开始认证，要AccessToken认证通过，且Redis中存在RefreshToken，且两个Token时间戳一致
         String appUserTokenKey = RedisKeyUtils.getAppUserTokenKey(adminTokenVO.getUserName());
         String tokenVar1 = (String) redisDao.get(appUserTokenKey);
+        if (StringUtils.isBlank(tokenVar1)) {
+            // token过期
+            throw new CustomException(PublicCodeEnum.TOKEN_NOT_EXIST.getCode(), PublicCodeEnum.TOKEN_NOT_EXIST.getMsg(), CustomException.LOGGER_WARN_TYPE);
+        }
         if (!Objects.equals(tokenVar1, token)) {
-            throw new AuthenticationException("Token已过期(Token expired or incorrect.)");
+            throw new CustomException(PublicCodeEnum.TOKEN_VERIFY_FAIL.getCode(), PublicCodeEnum.TOKEN_VERIFY_FAIL.getMsg(), CustomException.LOGGER_WARN_TYPE);
         }
         return new SimpleAuthenticationInfo(token, token, this.getClass().getName());
     }
