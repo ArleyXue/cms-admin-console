@@ -11,10 +11,7 @@ import com.arley.cms.console.util.JJWTUtils;
 import com.arley.cms.console.util.RedisKeyUtils;
 import io.jsonwebtoken.Claims;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authc.AuthenticationException;
-import org.apache.shiro.authc.AuthenticationInfo;
-import org.apache.shiro.authc.AuthenticationToken;
-import org.apache.shiro.authc.SimpleAuthenticationInfo;
+import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.SimpleAuthorizationInfo;
 import org.apache.shiro.realm.AuthorizingRealm;
@@ -47,6 +44,36 @@ public class MyShiroRealm extends AuthorizingRealm {
         return token instanceof JWTToken;
     }
 
+
+
+    /**
+     * 默认使用此方法进行用户名正确与否验证，错误抛出异常即可。
+     */
+    @Override
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken auth) throws AuthenticationException {
+        String token = (String) auth.getCredentials();
+        // 解密获得account，用于和数据库进行对比
+        Claims claims = JJWTUtils.parseJWT(token);
+        AdminTokenVO adminTokenVO = FastJsonUtils.json2Bean(claims.getSubject(), AdminTokenVO.class);
+        SysUserVO sysUserVO = sysUserService.getSysUserByUserName(adminTokenVO.getUserName());
+        // 查询用户是否存在
+
+        if (sysUserVO == null) {
+            throw new CustomException(PublicCodeEnum.FAIL.getCode(), "账号不存在!", CustomException.LOGGER_WARN_TYPE);
+        }
+        // 开始认证，要AccessToken认证通过，且Redis中存在RefreshToken，且两个Token时间戳一致
+        String appUserTokenKey = RedisKeyUtils.getAppUserTokenKey(adminTokenVO.getUserName());
+        String tokenVar1 = (String) redisDao.get(appUserTokenKey);
+        if (StringUtils.isBlank(tokenVar1)) {
+            // token过期
+            throw new ExpiredCredentialsException("token过期");
+        }
+        if (!Objects.equals(tokenVar1, token)) {
+            throw new IncorrectCredentialsException("token无效");
+        }
+        return new SimpleAuthenticationInfo(token, token, this.getClass().getName());
+    }
+
     /**
      * 只有当需要检测用户权限的时候才会调用此方法，例如checkRole,checkPermission之类的
      */
@@ -74,31 +101,4 @@ public class MyShiroRealm extends AuthorizingRealm {
         return simpleAuthorizationInfo;
     }
 
-    /**
-     * 默认使用此方法进行用户名正确与否验证，错误抛出异常即可。
-     */
-    @Override
-    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken auth) throws AuthenticationException {
-        String token = (String) auth.getCredentials();
-        // 解密获得account，用于和数据库进行对比
-        Claims claims = JJWTUtils.parseJWT(token);
-        AdminTokenVO adminTokenVO = FastJsonUtils.json2Bean(claims.getSubject(), AdminTokenVO.class);
-        SysUserVO sysUserVO = sysUserService.getSysUserByUserName(adminTokenVO.getUserName());
-        // 查询用户是否存在
-
-        if (sysUserVO == null) {
-            throw new CustomException(PublicCodeEnum.FAIL.getCode(), "账号不存在!", CustomException.LOGGER_WARN_TYPE);
-        }
-        // 开始认证，要AccessToken认证通过，且Redis中存在RefreshToken，且两个Token时间戳一致
-        String appUserTokenKey = RedisKeyUtils.getAppUserTokenKey(adminTokenVO.getUserName());
-        String tokenVar1 = (String) redisDao.get(appUserTokenKey);
-        if (StringUtils.isBlank(tokenVar1)) {
-            // token过期
-            throw new CustomException(PublicCodeEnum.TOKEN_NOT_EXIST.getCode(), PublicCodeEnum.TOKEN_NOT_EXIST.getMsg(), CustomException.LOGGER_WARN_TYPE);
-        }
-        if (!Objects.equals(tokenVar1, token)) {
-            throw new CustomException(PublicCodeEnum.TOKEN_VERIFY_FAIL.getCode(), PublicCodeEnum.TOKEN_VERIFY_FAIL.getMsg(), CustomException.LOGGER_WARN_TYPE);
-        }
-        return new SimpleAuthenticationInfo(token, token, this.getClass().getName());
-    }
 }

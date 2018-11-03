@@ -104,12 +104,7 @@
             <version>1.4.0</version>
         </dependency>
 
-        <!-- shiro+redis缓存插件 -->
-        <dependency>
-            <groupId>org.crazycake</groupId>
-            <artifactId>shiro-redis</artifactId>
-            <version>2.4.2.1-RELEASE</version>
-        </dependency>
+
 
         <!-- fastjson依赖 -->
         <dependency>

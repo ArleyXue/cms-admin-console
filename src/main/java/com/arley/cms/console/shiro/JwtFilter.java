@@ -1,13 +1,19 @@
 package com.arley.cms.console.shiro;
 
+import com.arley.cms.console.constant.PublicCodeEnum;
 import com.arley.cms.console.constant.PublicConstants;
 import com.arley.cms.console.exception.CustomException;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authc.ExpiredCredentialsException;
+import org.apache.shiro.authc.IncorrectCredentialsException;
 import org.apache.shiro.web.filter.authc.BasicHttpAuthenticationFilter;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLEncoder;
 
 /**
  * @author Mr.Li
@@ -50,10 +56,11 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
             try {
                 executeLogin(request, response);
                 return true;
+            } catch (ExpiredCredentialsException e1) {
+                response401(request, response, PublicCodeEnum.TOKEN_NOT_EXIST.getCode(), PublicCodeEnum.TOKEN_NOT_EXIST.getMsg());
+            } catch (IncorrectCredentialsException e2) {
+                response401(request, response, PublicCodeEnum.TOKEN_VERIFY_FAIL.getCode(), PublicCodeEnum.TOKEN_VERIFY_FAIL.getMsg());
             } catch (Exception e) {
-                //token 错误
-                // responseError(response, e.getMessage());
-                System.out.println("错误了");
                 e.printStackTrace();
             }
         }
@@ -65,14 +72,28 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
      *
      */
     @Override
-    protected boolean executeLogin(ServletRequest request, ServletResponse response) throws Exception {
-        HttpServletRequest requestWrapper = (HttpServletRequest) request;
-        String token = requestWrapper.getHeader(PublicConstants.REQUEST_HEADER_TOKEN_NAME);;
+    protected boolean executeLogin(ServletRequest request, ServletResponse response) {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+        String token = httpServletRequest.getHeader(PublicConstants.REQUEST_HEADER_TOKEN_NAME);;
         JWTToken jwtToken = new JWTToken(token);
         // 提交给realm进行登入，如果错误他会抛出异常并被捕获
         getSubject(request, response).login(jwtToken);
         // 如果没有抛出异常则代表登入成功，返回true
         return true;
+    }
+
+    /**
+     * 将非法请求跳转到 /401
+     */
+    private void response401(ServletRequest request, ServletResponse resp, String resultCode, String resultDesc) {
+        try {
+            HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+            HttpServletResponse httpServletResponse = (HttpServletResponse) resp;
+            String contextPath = httpServletRequest.getContextPath();
+            httpServletResponse.sendRedirect(contextPath + "/api/user/401?resultCode=" + resultCode + "&resultDesc=" + URLEncoder.encode(resultDesc, "UTF-8"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

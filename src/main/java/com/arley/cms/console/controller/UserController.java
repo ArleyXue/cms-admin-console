@@ -15,6 +15,7 @@ import org.apache.shiro.authc.DisabledAccountException;
 import org.apache.shiro.authc.UnknownAccountException;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -108,4 +109,14 @@ public class UserController {
     public AnswerBody logout() {
         return AnswerBody.buildAnswerBody();
     }
+
+    /**
+     * 401
+     * @return
+     */
+    @RequestMapping(value = "/401")
+    public AnswerBody unauthorized(String resultCode, String resultDesc) {
+        return AnswerBody.buildAnswerBody(resultCode, resultDesc);
+    }
+
 }

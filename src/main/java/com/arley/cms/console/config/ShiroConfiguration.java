@@ -73,10 +73,13 @@ public class ShiroConfiguration {
         filterMap.put("jwt", new JwtFilter());
         factoryBean.setFilters(filterMap);
         factoryBean.setSecurityManager(securityManager);
+        factoryBean.setUnauthorizedUrl("/api/user/401");
         // 自定义url规则
         Map<String, String> filterRuleMap = new HashMap<>(16);
         // 所有请求通过我们自己的JWTFilter
         filterRuleMap.put("/**", "jwt");
+        // 访问401和404页面不通过我们的Filter
+        filterRuleMap.put("/api/user/401", "anon");
         factoryBean.setFilterChainDefinitionMap(filterRuleMap);
         return factoryBean;
     }

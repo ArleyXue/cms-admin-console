@@ -7,6 +7,7 @@ import com.arley.cms.console.util.CommonUtils;
 import com.arley.cms.console.util.FastJsonUtils;
 import com.arley.cms.console.util.RequestUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +63,7 @@ public class ApiLogFilter extends OncePerRequestFilter {
 
     /**
      * 响应
+     *
      * @param request
      * @param response
      * @throws IOException
@@ -78,7 +80,6 @@ public class ApiLogFilter extends OncePerRequestFilter {
             response.resetBuffer();
             message = FastJsonUtils.obj2Str(AnswerBody.buildAnswerBody(PublicCodeEnum.SERVICE_NOT_EXIST));
         }
-
         // 输出接口访问日志
         logger.info("【接口访问日志】请求路径={} | 来源IP={} | 请求参数={} | 响应参数={} | 处理时间={}ms",
                 url,
@@ -88,27 +89,8 @@ public class ApiLogFilter extends OncePerRequestFilter {
                 time);
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(message);
+
     }
-
-    private class ListEnumeration<T> implements Enumeration<T> {
-        private int current;
-        private List<T> list;
-
-        public ListEnumeration(List<T> list) {
-            this.list = list;
-        }
-
-        @Override
-        public boolean hasMoreElements() {
-            return current < list.size();
-        }
-
-        @Override
-        public T nextElement() {
-            return list.get(current++);
-        }
-    }
-
 
     /**
      * 重写request
@@ -176,6 +158,60 @@ public class ApiLogFilter extends OncePerRequestFilter {
         public byte[] getDataStream() {
             return data;
         }
+
+
+        private class ListEnumeration<T> implements Enumeration<T> {
+            private int current;
+            private List<T> list;
+
+            public ListEnumeration(List<T> list) {
+                this.list = list;
+            }
+
+            @Override
+            public boolean hasMoreElements() {
+                return current < list.size();
+            }
+
+            @Override
+            public T nextElement() {
+                return list.get(current++);
+            }
+        }
+
+
+        private class FilterServletInputStream extends ServletInputStream {
+            private DataInputStream inputStream;
+
+            public FilterServletInputStream(InputStream inputStream) {
+                this.inputStream = new DataInputStream(inputStream);
+            }
+
+            @Override
+            public int read() throws IOException {
+                return inputStream.read();
+            }
+
+            /**
+             * 兼容Servlet API 3.0
+             *
+             * @return
+             */
+            @Override
+            public boolean isFinished() {
+                return false;
+            }
+
+            @Override
+            public boolean isReady() {
+                return false;
+            }
+
+            @Override
+            public void setReadListener(ReadListener arg0) {
+
+            }
+        }
     }
 
     /**
@@ -184,13 +220,11 @@ public class ApiLogFilter extends OncePerRequestFilter {
     public class ResponseWrapper extends HttpServletResponseWrapper {
         ByteArrayOutputStream output;
         FilterServletOutputStream filterOutput;
-        //总是输出200
         int status = 200;
 
         public ResponseWrapper(HttpServletResponse response) {
             super(response);
             output = new ByteArrayOutputStream();
-            super.setStatus(status);
         }
 
         @Override
@@ -200,39 +234,6 @@ public class ApiLogFilter extends OncePerRequestFilter {
             }
             output = new ByteArrayOutputStream();
             filterOutput = new FilterServletOutputStream(output);
-        }
-
-        @Override
-        public void setStatus(int sc) {
-            //禁止设定status，避免重定向到网页
-            super.setStatus(sc);
-            this.status = sc;
-        }
-
-        @Override
-        public int getStatus() {
-            return status;
-        }
-
-        @Override
-        public void sendError(int sc) throws IOException {
-            //禁止重定向
-            setStatus(sc);
-            // super.sendError(sc);
-        }
-
-        @Override
-        public void sendError(int sc, String msg) throws IOException {
-            //禁止重定向
-            setStatus(sc);
-            // super.sendError(sc, msg);
-        }
-
-        @Override
-        public void sendRedirect(String location) throws IOException {
-            //禁止重定向
-            //setStatus();
-            super.sendRedirect(location);
         }
 
         @Override
@@ -247,78 +248,71 @@ public class ApiLogFilter extends OncePerRequestFilter {
             return output.toByteArray();
         }
 
-    }
-
-    private class FilterServletInputStream extends ServletInputStream {
-        private DataInputStream inputStream;
-
-        public FilterServletInputStream(InputStream inputStream) {
-            this.inputStream = new DataInputStream(inputStream);
+        @Override
+        public void setStatus(int sc) {
+            super.setStatus(sc);
+            this.status = sc;
         }
 
         @Override
-        public int read() throws IOException {
-            return inputStream.read();
-        }
-
-        /**
-         * 兼容Servlet API 3.0
-         * @return
-         */
-        @Override
-        public boolean isFinished() {
-            return false;
+        public int getStatus() {
+            return this.status;
         }
 
         @Override
-        public boolean isReady() {
-            return false;
+        public void sendError(int sc) throws IOException {
+            setStatus(sc);
+            // super.sendError(sc);
         }
 
         @Override
-        public void setReadListener(ReadListener arg0) {
-
+        public void sendError(int sc, String msg) throws IOException {
+            setStatus(sc);
+            // super.sendError(sc, msg);
         }
-    }
-
-    /**
-     *  重写 ServletOutputStream
-     */
-    public class FilterServletOutputStream extends ServletOutputStream {
-        DataOutputStream output;
-
-        public FilterServletOutputStream(OutputStream output) {
-            this.output = new DataOutputStream(output);
-        }
-
-        @Override
-        public void write(int arg0) throws IOException {
-            output.write(arg0);
-        }
-
 
 
         /**
-         * 兼容Servlet API 3.0
-         * @return
+         *  重写 ServletOutputStream
          */
-        @Override
-        public boolean isReady() {
-            return false;
+        public class FilterServletOutputStream extends ServletOutputStream {
+            DataOutputStream output;
+
+            public FilterServletOutputStream(OutputStream output) {
+                this.output = new DataOutputStream(output);
+            }
+
+            @Override
+            public void write(int arg0) throws IOException {
+                output.write(arg0);
+            }
+
+            /**
+             * 兼容Servlet API 3.0
+             * @return
+             */
+            @Override
+            public boolean isReady() {
+                return false;
+            }
+
+            @Override
+            public void setWriteListener(WriteListener arg0) {
+
+            }
         }
 
-        @Override
-        public void setWriteListener(WriteListener arg0) {
-
-        }
     }
+
+
 
     /**
      * 是否排除此路径
+     *
      * @param url
      * @return
      */
-    private boolean isExclude (String url) {
+    private boolean isExclude(String url) {
         boolean isExclude = false;
         if (CommonUtils.isNotEmptyCollection(this.excludeUrlPatterns)) {
             for (String pattern : this.excludeUrlPatterns) {

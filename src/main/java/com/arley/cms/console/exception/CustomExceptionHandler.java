@@ -20,7 +20,7 @@ import javax.servlet.http.HttpServletRequest;
  * @Description: 异常处理
  * @date Created in 2018/4/8 15:14
  */
-@RestControllerAdvice
+@ControllerAdvice
 public class CustomExceptionHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomExceptionHandler.class);
@@ -32,6 +32,7 @@ public class CustomExceptionHandler {
      * @return
      */
     @ExceptionHandler(Exception.class)
+    @ResponseBody
     public AnswerBody exception(Exception exception, HttpServletRequest request){
         logger.error(exception.getMessage(), exception);
         AnswerBody body = AnswerBody.buildAnswerBody(PublicCodeEnum.ERROR.getCode(), PublicCodeEnum.ERROR.getMsg());
@@ -50,6 +51,7 @@ public class CustomExceptionHandler {
      * @return
      */
     @ExceptionHandler(CustomException.class)
+    @ResponseBody
     public AnswerBody customException(CustomException exception){
         AnswerBody body = AnswerBody.buildAnswerBody(exception.getCode(), exception.getMsg());
         if (CustomException.LOGGER_INFO_TYPE.equals(exception.getType())) {
