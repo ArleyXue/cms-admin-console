@@ -2,6 +2,7 @@ package com.arley.cms.console.controller;
 
 import com.arley.cms.console.component.RedisDao;
 import com.arley.cms.console.constant.PublicCodeEnum;
+import com.arley.cms.console.constant.PublicConstants;
 import com.arley.cms.console.exception.CustomException;
 import com.arley.cms.console.pojo.vo.AdminTokenVO;
 import com.arley.cms.console.pojo.vo.LoginLogVO;
@@ -10,13 +11,8 @@ import com.arley.cms.console.service.LoginLogService;
 import com.arley.cms.console.service.SysUserService;
 import com.arley.cms.console.shiro.Encrypt;
 import com.arley.cms.console.util.*;
-import io.jsonwebtoken.Claims;
-import org.apache.shiro.authc.DisabledAccountException;
-import org.apache.shiro.authc.UnknownAccountException;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -96,7 +92,7 @@ public class UserController {
         data.put("token", token);
 
         String appUserTokenKey = RedisKeyUtils.getAppUserTokenKey(adminTokenVO.getUserName());
-        redisDao.set(appUserTokenKey, token, 30, TimeUnit.MINUTES);
+        redisDao.set(appUserTokenKey, token, PublicConstants.TOKEN_VALID_TIME, TimeUnit.MINUTES);
 
         return AnswerBody.buildAnswerBody(data);
     }
@@ -106,7 +102,9 @@ public class UserController {
      * @return
      */
     @RequestMapping(value = "/logout")
-    public AnswerBody logout() {
+    public AnswerBody logout(@RequestHeader String loginUserName) {
+        // 删除redis中的token
+        redisDao.delete(RedisKeyUtils.getAppUserTokenKey(loginUserName));
         return AnswerBody.buildAnswerBody();
     }
 

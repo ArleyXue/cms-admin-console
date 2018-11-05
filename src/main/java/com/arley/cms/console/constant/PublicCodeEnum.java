@@ -11,6 +11,7 @@ public enum PublicCodeEnum implements Code {
     FAIL("0001", "操作失败!"),
     PARAM_EMPTY("0002", "参数为空!"),
     PARAM_ERROR("0003", "参数错误!"),
+    EDIT_ADMIN("0010", "admin账号禁止此项操作"),
     TOKEN_NOT_EXIST("0100", "登录已失效，请重新登录!"),
     TOKEN_VERIFY_FAIL("0101", "您的账号在其他地方登录!"),
     NO_PERMISSION("1000", "无访问权限!"),

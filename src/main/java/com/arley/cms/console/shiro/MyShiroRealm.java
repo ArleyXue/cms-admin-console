@@ -2,6 +2,7 @@ package com.arley.cms.console.shiro;
 
 import com.arley.cms.console.component.RedisDao;
 import com.arley.cms.console.constant.PublicCodeEnum;
+import com.arley.cms.console.constant.PublicConstants;
 import com.arley.cms.console.exception.CustomException;
 import com.arley.cms.console.pojo.vo.AdminTokenVO;
 import com.arley.cms.console.pojo.vo.SysUserVO;
@@ -19,8 +20,10 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 自定义Realm
@@ -32,8 +35,10 @@ public class MyShiroRealm extends AuthorizingRealm {
     private static final Logger LOGGER = LoggerFactory.getLogger(MyShiroRealm.class);
 
     @Autowired
+    @Lazy
     private SysUserService sysUserService;
     @Autowired
+    @Lazy
     private RedisDao redisDao;
 
     /**
@@ -55,12 +60,7 @@ public class MyShiroRealm extends AuthorizingRealm {
         // 解密获得account，用于和数据库进行对比
         Claims claims = JJWTUtils.parseJWT(token);
         AdminTokenVO adminTokenVO = FastJsonUtils.json2Bean(claims.getSubject(), AdminTokenVO.class);
-        SysUserVO sysUserVO = sysUserService.getSysUserByUserName(adminTokenVO.getUserName());
-        // 查询用户是否存在
 
-        if (sysUserVO == null) {
-            throw new CustomException(PublicCodeEnum.FAIL.getCode(), "账号不存在!", CustomException.LOGGER_WARN_TYPE);
-        }
         // 开始认证，要AccessToken认证通过，且Redis中存在RefreshToken，且两个Token时间戳一致
         String appUserTokenKey = RedisKeyUtils.getAppUserTokenKey(adminTokenVO.getUserName());
         String tokenVar1 = (String) redisDao.get(appUserTokenKey);
@@ -71,6 +71,9 @@ public class MyShiroRealm extends AuthorizingRealm {
         if (!Objects.equals(tokenVar1, token)) {
             throw new IncorrectCredentialsException("token无效");
         }
+
+        // 重新设置过期时间
+        redisDao.expire(appUserTokenKey, PublicConstants.TOKEN_VALID_TIME, TimeUnit.MINUTES);
         return new SimpleAuthenticationInfo(token, token, this.getClass().getName());
     }
 

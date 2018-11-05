@@ -60,7 +60,7 @@ public class CustomCache<K,V> implements Cache<K,V> {
     public Object put(Object key, Object value) throws CacheException {
         // 设置Redis的Shiro缓存
         System.out.println(this.getKey(key.toString()));
-        return redisDao.set(this.getKey(key.toString()), value, PublicConstants.EXRP_HOUR, TimeUnit.SECONDS);
+        return redisDao.set(this.getKey(key.toString()), value, PublicConstants.SHIRO_CACHE_TIME, TimeUnit.SECONDS);
     }
 
     /**

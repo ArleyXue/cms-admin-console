@@ -7,6 +7,16 @@ package com.arley.cms.console.constant;
  */
 public class PublicConstants {
 
+
+    /**
+     * 超级管理员用户名
+     */
+    public static final String ADMIN_USER_NAME = "admin";
+    /**
+     * 角色(超级管理员)DI
+     */
+    public static final Integer SUPER_ROLE_ID = 1;
+
     /**
      * tokenkey
      */
@@ -17,45 +27,20 @@ public class PublicConstants {
      */
     public static final String REQUEST_HEADER_TOKEN_NAME = "token";
 
-    /**
-     * redis-OK
-     */
-    public final static String OK = "OK";
 
     /**
-     * redis过期时间，以秒为单位，一分钟
+     * TOKEN过期时间，以分为单位，一小时
      */
-    public final static int EXRP_MINUTE = 60;
+    public final static int TOKEN_VALID_TIME = 60;
 
     /**
-     * redis过期时间，以秒为单位，一小时
+     * shiro缓存时间，以分为单位，一小时
      */
-    public final static int EXRP_HOUR = 60 * 60;
-
-    /**
-     * redis过期时间，以秒为单位，一天
-     */
-    public final static int EXRP_DAY = 60 * 60 * 24;
+    public final static int SHIRO_CACHE_TIME = 60;
 
     /**
      * redis-key-前缀-shiro:cache:
      */
     public final static String PREFIX_SHIRO_CACHE = "shiro:cache:";
-
-    /**
-     * redis-key-前缀-shiro:access_token:
-     */
-    public final static String PREFIX_SHIRO_ACCESS_TOKEN = "shiro:access_token:";
-
-    /**
-     * redis-key-前缀-shiro:refresh_token:
-     */
-    public final static String PREFIX_SHIRO_REFRESH_TOKEN = "shiro:refresh_token:";
-
-
-    /**
-     * JWT-currentTimeMillis:
-     */
-    public final static String CURRENT_TIME_MILLIS = "currentTimeMillis";
 
 }

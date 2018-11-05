@@ -2,10 +2,10 @@ package com.arley.cms.console.interceptor;
 
 
 import com.arley.cms.console.constant.PublicCodeEnum;
-import com.arley.cms.console.util.AnswerBody;
-import com.arley.cms.console.util.CommonUtils;
-import com.arley.cms.console.util.FastJsonUtils;
-import com.arley.cms.console.util.RequestUtils;
+import com.arley.cms.console.constant.PublicConstants;
+import com.arley.cms.console.pojo.vo.AdminTokenVO;
+import com.arley.cms.console.util.*;
+import io.jsonwebtoken.Claims;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.lang3.StringUtils;
@@ -57,6 +57,16 @@ public class ApiLogFilter extends OncePerRequestFilter {
         RequestWrapper requestWrapper = new RequestWrapper(request);
         ResponseWrapper responseWrapper = new ResponseWrapper(response);
         request.setAttribute("inTime", System.currentTimeMillis());
+
+        String token = request.getHeader(PublicConstants.REQUEST_HEADER_TOKEN_NAME);
+        if (StringUtils.isNotBlank(token)) {
+            // 解密获得account，用于和数据库进行对比
+            Claims claims = JJWTUtils.parseJWT(token);
+            AdminTokenVO adminTokenVO = FastJsonUtils.json2Bean(claims.getSubject(), AdminTokenVO.class);
+            requestWrapper.setHeader("loginUserName", adminTokenVO.getUserName());
+            requestWrapper.setHeader("loginUserId", adminTokenVO.getUserId().toString());
+        }
+
         chain.doFilter(requestWrapper, responseWrapper);
         write(requestWrapper, responseWrapper);
     }

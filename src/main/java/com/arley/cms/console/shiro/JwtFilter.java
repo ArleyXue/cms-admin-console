@@ -48,14 +48,13 @@ public class JwtFilter extends BasicHttpAuthenticationFilter {
      */
     @Override
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) {
-        HttpServletRequest requestWrapper = (HttpServletRequest) request;
-        String token = requestWrapper.getHeader(PublicConstants.REQUEST_HEADER_TOKEN_NAME);;
+        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+        String token = httpServletRequest.getHeader(PublicConstants.REQUEST_HEADER_TOKEN_NAME);
         //判断请求的请求头是否带上 "Token"
         if (StringUtils.isNotBlank(token)) {
             //如果存在，则进入 executeLogin 方法执行登入，检查 token 是否正确
             try {
                 executeLogin(request, response);
-                return true;
             } catch (ExpiredCredentialsException e1) {
                 response401(request, response, PublicCodeEnum.TOKEN_NOT_EXIST.getCode(), PublicCodeEnum.TOKEN_NOT_EXIST.getMsg());
             } catch (IncorrectCredentialsException e2) {
