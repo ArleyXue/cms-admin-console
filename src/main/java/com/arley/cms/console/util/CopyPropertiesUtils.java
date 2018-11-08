@@ -1,11 +1,11 @@
 package com.arley.cms.console.util;
 
-import com.arley.cms.console.pojo.Do.LoginLogDO;
-import com.arley.cms.console.pojo.Do.SysPermissionDO;
-import com.arley.cms.console.pojo.Do.SysUserDO;
+import com.arley.cms.console.pojo.Do.*;
 import com.arley.cms.console.pojo.vo.LoginLogVO;
 import com.arley.cms.console.pojo.vo.SysPermissionVO;
+import com.arley.cms.console.pojo.vo.SysRoleVO;
 import com.arley.cms.console.pojo.vo.SysUserVO;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 
 import java.util.ArrayList;
@@ -17,6 +17,20 @@ import java.util.List;
  * @date 2018/9/17 18:24
  */
 public class CopyPropertiesUtils {
+
+
+
+    public static List<SysRoleVO> convertSysRoleDOToVO(List<SysRoleDO> sysRoleDOList) {
+        List<SysRoleVO> sysRoleVOList = new ArrayList<>();
+        if (sysRoleDOList != null && sysRoleDOList.size() > 0) {
+            sysRoleDOList.forEach(e -> {
+                SysRoleVO vo = new SysRoleVO();
+                BeanUtils.copyProperties(e, vo);
+                sysRoleVOList.add(vo);
+            });
+        }
+        return sysRoleVOList;
+    }
 
     /**
      * 菜单转换 DO to VO

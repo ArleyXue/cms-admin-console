@@ -2,7 +2,6 @@ package com.arley.cms.console.shiro;
 
 import com.arley.cms.console.constant.PublicCodeEnum;
 import com.arley.cms.console.constant.PublicConstants;
-import com.arley.cms.console.exception.CustomException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.ExpiredCredentialsException;
 import org.apache.shiro.authc.IncorrectCredentialsException;

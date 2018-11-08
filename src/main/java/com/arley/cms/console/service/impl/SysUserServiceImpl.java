@@ -65,7 +65,7 @@ public class SysUserServiceImpl implements SysUserService {
         BeanUtils.copyProperties(sysUserVO, sysUserDO);
         sysUserDO.setGmtModified(DateUtils.getLocalDateTime());
         sysUserDO.setGmtCreate(DateUtils.getLocalDateTime());
-        sysUserDO.setLoginNum(1);
+        sysUserDO.setLoginNum(0);
         // 密码加密
         String md5Pwd = Encrypt.md5(sysUserVO.getPassword(), sysUserVO.getUserName());
         sysUserDO.setPassword(md5Pwd);

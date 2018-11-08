@@ -95,34 +95,4 @@ public class AdminController {
         return AnswerBody.buildAnswerBody(result);
     }
 
-    /**
-     * 修改用户状态
-     * @param userId
-     * @return
-     */
-    @RequestMapping(value = "/updateUserState")
-    public AnswerBody updateUserState(Integer userId, @RequestHeader String loginUserName) {
-        SysUserVO sysUser = sysUserService.getSysUser(userId);
-        if (Objects.equals(PublicConstants.ADMIN_USER_NAME, sysUser.getUserName())) {
-            return AnswerBody.buildAnswerBody(PublicCodeEnum.EDIT_ADMIN);
-        }
-        // 修改用户状态
-        sysUserService.updateSysUserState(userId, sysUser.getUserState() == 1 ? 0 : 1);
-
-        // 如果禁用把此用户踢下线
-       /* if (0 == sysUser.getUserState()) {
-            Collection<Session> activeSessions = sessionDAO.getActiveSessions();
-            activeSessions.forEach(s -> {
-                String userName = String.valueOf(s.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY));
-                if (Objects.equals(userName, sysUser.getUserName())) {
-                    s.setTimeout(0);
-                }
-            });
-        }*/
-        Map<String, Integer> result = new HashMap<>();
-        result.put("userState", sysUser.getUserState());
-        return AnswerBody.buildAnswerBody(result);
-    }
-
-
 }

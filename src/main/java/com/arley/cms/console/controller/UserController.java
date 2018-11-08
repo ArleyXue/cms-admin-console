@@ -44,7 +44,7 @@ public class UserController {
         data.put("roles", new String[]{"admin"});
         data.put("introduction", "我是超级管理员");
         data.put("avatar", "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
-        data.put("name", "超级管理员");
+        data.put("userName", "admin");
         AnswerBody body = AnswerBody.buildAnswerBody(data);
         return body;
     }
