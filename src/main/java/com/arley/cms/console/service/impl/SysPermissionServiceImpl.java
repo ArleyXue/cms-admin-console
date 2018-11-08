@@ -47,6 +47,9 @@ public class SysPermissionServiceImpl implements SysPermissionService {
     @Override
     public SysPermissionVO getPermission(Integer permissionId) {
         SysPermissionDO sysPermissionDO = sysPermissionMapper.selectById(permissionId);
+        if (null == sysPermissionDO) {
+            return null;
+        }
         SysPermissionVO sysPermissionVO = new SysPermissionVO();
         BeanUtils.copyProperties(sysPermissionDO, sysPermissionVO);
         return sysPermissionVO;
