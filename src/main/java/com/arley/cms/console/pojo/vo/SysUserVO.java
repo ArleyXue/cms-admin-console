@@ -80,11 +80,6 @@ public class SysUserVO {
      */
     private LocalDateTime gmtCreate;
 
-    /**
-     * 所拥有的角色
-     */
-    private List<SysRoleVO> roleList;
-
     public Integer getUserId() {
         return userId;
     }
@@ -197,12 +192,5 @@ public class SysUserVO {
         this.gmtCreate = gmtCreate;
     }
 
-    public void setRoleList(List<SysRoleVO> roleList) {
-        this.roleList = roleList;
-    }
 
-    @Override
-    public String toString() {
-        return userName;
-    }
 }

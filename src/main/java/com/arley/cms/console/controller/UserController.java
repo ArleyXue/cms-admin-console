@@ -4,10 +4,9 @@ import com.arley.cms.console.component.RedisDao;
 import com.arley.cms.console.constant.PublicCodeEnum;
 import com.arley.cms.console.constant.PublicConstants;
 import com.arley.cms.console.exception.CustomException;
-import com.arley.cms.console.pojo.vo.AdminTokenVO;
-import com.arley.cms.console.pojo.vo.LoginLogVO;
-import com.arley.cms.console.pojo.vo.SysUserVO;
+import com.arley.cms.console.pojo.vo.*;
 import com.arley.cms.console.service.LoginLogService;
+import com.arley.cms.console.service.SysPermissionService;
 import com.arley.cms.console.service.SysUserService;
 import com.arley.cms.console.shiro.Encrypt;
 import com.arley.cms.console.util.*;
@@ -18,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -36,18 +36,24 @@ public class UserController {
     @Autowired
     private LoginLogService loginLogService;
     @Autowired
+    private SysPermissionService sysPermissionService;
+    @Autowired
     private RedisDao redisDao;
 
+    /**
+     * 获取用户信息
+     * @return
+     */
     @RequestMapping(value = "/getUserInfo")
-    public AnswerBody getUserInfo() {
-        Map<String, Object> data = new HashMap<>();
-        data.put("roles", new String[]{"admin"});
-        data.put("introduction", "我是超级管理员");
-        data.put("avatar", "https://wpimg.wallstcn.com/f778738c-e4f8-4870-b634-56703b4acafe.gif");
-        data.put("userName", "admin");
-        AnswerBody body = AnswerBody.buildAnswerBody(data);
-        return body;
+    public AnswerBody getUserInfo(@RequestHeader Integer loginUserId) {
+        SysUserVO sysUser = sysUserService.getSysUser(loginUserId);
+        List<SysPermissionVO> sysPermissionVOList = sysPermissionService.listHavePermission(loginUserId);
+        SysUserInfoVO userInfoVO = new SysUserInfoVO();
+        userInfoVO.setSysUser(sysUser);
+        userInfoVO.setPermissionList(sysPermissionVOList);
+        return AnswerBody.buildAnswerBody(userInfoVO);
     }
+
 
     /**
      * 登录
