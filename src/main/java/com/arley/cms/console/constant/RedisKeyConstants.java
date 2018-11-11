@@ -17,6 +17,11 @@ public class RedisKeyConstants {
      */
     public static final String ADMIN_USER_TOKEN_KEY = REDIS_PREFIX + "ADMIN_USER_TOKEN_";
 
+    /**
+     * redis admin用户首页数据信息 key
+     */
+    public static final String ADMIN_USER_INDEX_DATA_KEY = REDIS_PREFIX + "ADMIN_USER_INDEX_DATA_";
+
 
 
 }

@@ -21,7 +21,7 @@ spring:
         min-idle: 0
     timeout: 3s
   datasource:
-      url: jdbc:mysql://39.106.170.176:3306/cms_db?useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false
+      url: jdbc:mysql://39.106.170.176:3306/cms_db?useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false&useSSL=false
       username: root
       password: Xuelei0324@
       # 使用druid数据源

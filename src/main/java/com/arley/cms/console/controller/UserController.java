@@ -7,12 +7,15 @@ import com.arley.cms.console.exception.CustomException;
 import com.arley.cms.console.pojo.vo.*;
 import com.arley.cms.console.service.LoginLogService;
 import com.arley.cms.console.service.SysPermissionService;
+import com.arley.cms.console.service.SysRoleService;
 import com.arley.cms.console.service.SysUserService;
 import com.arley.cms.console.shiro.Encrypt;
 import com.arley.cms.console.util.*;
+import com.baomidou.mybatisplus.extension.api.R;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
@@ -33,6 +36,8 @@ public class UserController {
 
     @Autowired
     private SysUserService sysUserService;
+    @Autowired
+    private SysRoleService sysRoleService;
     @Autowired
     private LoginLogService loginLogService;
     @Autowired
@@ -67,6 +72,30 @@ public class UserController {
     }
 
     /**
+     * 修改密码
+     * @param oldPassword
+     * @param newPassword
+     * @return
+     */
+    @RequestMapping(value = "/updatePassword")
+    public AnswerBody updatePassword(String oldPassword, String newPassword, @RequestHeader Integer loginUserId) {
+        sysUserService.updatePassword(oldPassword, newPassword, loginUserId);
+        return AnswerBody.buildAnswerBody();
+    }
+
+    /**
+     * 获取用户首页数据
+     * @param loginUserName
+     * @return
+     */
+    @RequestMapping(value = "/getUserIndexData")
+    public AnswerBody getUserIndexData(@RequestHeader String loginUserName) {
+        String appUserIndexDataKey = RedisKeyUtils.getAppUserIndexDataKey(loginUserName);
+        UserIndexData userIndexData = (UserIndexData) redisDao.get(appUserIndexDataKey);
+        return AnswerBody.buildAnswerBody(userIndexData);
+    }
+
+    /**
      * 登录
      * @param userName
      * @param password
@@ -91,6 +120,20 @@ public class UserController {
             throw new CustomException(PublicCodeEnum.FAIL.getCode(), "账号被禁用,请联系管理员!", CustomException.LOGGER_WARN_TYPE);
         }
 
+        // 获取用户角色
+        SysRoleVO role = sysRoleService.getRoleBySysUserId(sysUserVO.getUserId());
+        // 保存用户首页信息
+        UserIndexData userIndexData = new UserIndexData();
+        userIndexData.setUserName(sysUserVO.getUserName());
+        userIndexData.setName(sysUserVO.getName());
+        userIndexData.setAvatar(sysUserVO.getAvatar());
+        userIndexData.setLastLoginTime(sysUserVO.getLoginTime());
+        userIndexData.setRoleName(role.getRoleName());
+        String appUserIndexDataKey = RedisKeyUtils.getAppUserIndexDataKey(sysUserVO.getUserName());
+        redisDao.set(appUserIndexDataKey, userIndexData);
+
+        // 修改信息
+        sysUserService.updateForLogin(sysUserVO.getUserId());
         // 保存登录日志
         LoginLogVO loginLog = new LoginLogVO();
         loginLog.setUserName(userName);

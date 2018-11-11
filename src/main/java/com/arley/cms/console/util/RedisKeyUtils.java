@@ -20,5 +20,14 @@ public class RedisKeyUtils {
         return RedisKeyConstants.ADMIN_USER_TOKEN_KEY + userName;
     }
 
+    /**
+     * 获取admin用户首页数据 key
+     * @param userName
+     * @return
+     */
+    public static String getAppUserIndexDataKey(String userName) {
+        return RedisKeyConstants.ADMIN_USER_INDEX_DATA_KEY + userName;
+    }
+
 
 }

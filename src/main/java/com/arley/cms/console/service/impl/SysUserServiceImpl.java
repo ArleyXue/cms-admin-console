@@ -1,5 +1,6 @@
 package com.arley.cms.console.service.impl;
 
+import com.arley.cms.console.component.RedisDao;
 import com.arley.cms.console.constant.PublicCodeEnum;
 import com.arley.cms.console.exception.CustomException;
 import com.arley.cms.console.mapper.SysUserMapper;
@@ -9,10 +10,7 @@ import com.arley.cms.console.pojo.query.SysUserQuery;
 import com.arley.cms.console.pojo.vo.SysUserVO;
 import com.arley.cms.console.service.SysUserService;
 import com.arley.cms.console.shiro.Encrypt;
-import com.arley.cms.console.util.CopyPropertiesUtils;
-import com.arley.cms.console.util.DateUtils;
-import com.arley.cms.console.util.PageUtils;
-import com.arley.cms.console.util.Pagination;
+import com.arley.cms.console.util.*;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -37,6 +35,8 @@ public class SysUserServiceImpl implements SysUserService {
 
     @Autowired
     private SysUserMapper sysUserMapper;
+    @Autowired
+    private RedisDao redisDao;
 
     @Override
     public Pagination listSysUserByPage(SysUserQuery sysUserQuery) {
@@ -146,6 +146,9 @@ public class SysUserServiceImpl implements SysUserService {
         md5Pwd = Encrypt.md5(newPassword, sysUserDO.getUserName());
         sysUserDO.setPassword(md5Pwd);
         sysUserDO.setGmtModified(DateUtils.getLocalDateTime());
+        // 删除redis token
+        String appUserTokenKey = RedisKeyUtils.getAppUserTokenKey(sysUserDO.getUserName());
+        redisDao.delete(appUserTokenKey);
         sysUserMapper.updateById(sysUserDO);
     }
 
