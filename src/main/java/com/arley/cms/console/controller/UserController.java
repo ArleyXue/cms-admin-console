@@ -54,6 +54,17 @@ public class UserController {
         return AnswerBody.buildAnswerBody(userInfoVO);
     }
 
+    /**
+     * 修改个人信息
+     * @param sysUserVO
+     * @return
+     */
+    @RequestMapping(value = "/updateUserInfo")
+    public AnswerBody updateUserInfo(SysUserVO sysUserVO, @RequestHeader Integer loginUserId) {
+        sysUserVO.setUserId(loginUserId);
+        sysUserService.updateUserInfo(sysUserVO);
+        return AnswerBody.buildAnswerBody();
+    }
 
     /**
      * 登录
