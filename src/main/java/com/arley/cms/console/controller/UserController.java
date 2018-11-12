@@ -85,13 +85,26 @@ public class UserController {
 
     /**
      * 获取用户首页数据
-     * @param loginUserName
+     * @param loginUserId
      * @return
      */
     @RequestMapping(value = "/getUserIndexData")
-    public AnswerBody getUserIndexData(@RequestHeader String loginUserName) {
-        String appUserIndexDataKey = RedisKeyUtils.getAppUserIndexDataKey(loginUserName);
-        UserIndexData userIndexData = (UserIndexData) redisDao.get(appUserIndexDataKey);
+    public AnswerBody getUserIndexData(@RequestHeader Integer loginUserId) {
+        SysUserVO sysUser = sysUserService.getSysUser(loginUserId);
+        // 获取用户角色
+        SysRoleVO role = sysRoleService.getRoleBySysUserId(loginUserId);
+        // 获取用户上次登录日志
+        LoginLogVO loginLogVO = loginLogService.getLastLoginLog(sysUser.getUserName());
+        // 保存用户首页信息
+        UserIndexData userIndexData = new UserIndexData();
+        userIndexData.setUserName(sysUser.getUserName());
+        userIndexData.setName(sysUser.getName());
+        userIndexData.setAvatar(sysUser.getAvatar());
+        if (null != loginLogVO) {
+            userIndexData.setLastLoginTime(loginLogVO.getLoginTime());
+            userIndexData.setLastLoginLocation(loginLogVO.getLoginLocation());
+        }
+        userIndexData.setRoleName(role.getRoleName());
         return AnswerBody.buildAnswerBody(userIndexData);
     }
 
@@ -120,18 +133,6 @@ public class UserController {
             throw new CustomException(PublicCodeEnum.FAIL.getCode(), "账号被禁用,请联系管理员!", CustomException.LOGGER_WARN_TYPE);
         }
 
-        // 获取用户角色
-        SysRoleVO role = sysRoleService.getRoleBySysUserId(sysUserVO.getUserId());
-        // 保存用户首页信息
-        UserIndexData userIndexData = new UserIndexData();
-        userIndexData.setUserName(sysUserVO.getUserName());
-        userIndexData.setName(sysUserVO.getName());
-        userIndexData.setAvatar(sysUserVO.getAvatar());
-        userIndexData.setLastLoginTime(sysUserVO.getLoginTime());
-        userIndexData.setRoleName(role.getRoleName());
-        String appUserIndexDataKey = RedisKeyUtils.getAppUserIndexDataKey(sysUserVO.getUserName());
-        redisDao.set(appUserIndexDataKey, userIndexData);
-
         // 修改信息
         sysUserService.updateForLogin(sysUserVO.getUserId());
         // 保存登录日志
@@ -140,6 +141,9 @@ public class UserController {
         loginLog.setLoginTime(DateUtils.getLocalDateTime());
         loginLog.setLoginIp(RequestUtils.getClientIpAddr(request));
         loginLog.setContent("登录成功");
+        loginLog.setLogType(1);
+        String addresses = AddressUtils.getAddresses(loginLog.getLoginIp());
+        loginLog.setLoginLocation(addresses);
         loginLogService.insertLoginLog(loginLog);
 
         // 生成token
@@ -153,7 +157,6 @@ public class UserController {
 
         String appUserTokenKey = RedisKeyUtils.getAppUserTokenKey(adminTokenVO.getUserName());
         redisDao.set(appUserTokenKey, token, PublicConstants.TOKEN_VALID_TIME, TimeUnit.MINUTES);
-
         return AnswerBody.buildAnswerBody(data);
     }
 
@@ -163,6 +166,13 @@ public class UserController {
      */
     @RequestMapping(value = "/logout")
     public AnswerBody logout(@RequestHeader String loginUserName) {
+        // 保存退出日志
+        LoginLogVO loginLog = new LoginLogVO();
+        loginLog.setUserName(loginUserName);
+        loginLog.setLoginTime(DateUtils.getLocalDateTime());
+        loginLog.setContent("退出登录");
+        loginLog.setLogType(2);
+        loginLogService.insertLoginLog(loginLog);
         // 删除redis中的token
         redisDao.delete(RedisKeyUtils.getAppUserTokenKey(loginUserName));
         return AnswerBody.buildAnswerBody();

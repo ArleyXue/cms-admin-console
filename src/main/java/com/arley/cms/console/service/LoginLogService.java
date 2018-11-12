@@ -4,6 +4,9 @@ import com.arley.cms.console.pojo.query.LoginLogQuery;
 import com.arley.cms.console.pojo.vo.LoginLogVO;
 import com.arley.cms.console.util.Pagination;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+
 /**
  * @author XueXianlei
  * @Description:
@@ -23,4 +26,24 @@ public interface LoginLogService {
      * @return
      */
     Pagination listLoginLogByPage(LoginLogQuery loginLogQuery);
+
+    /**
+     * 查询一周的访问量
+     * @return
+     */
+    List<LinkedHashMap<String, Integer>> listPageViewByWeek();
+
+    /**
+     * 查询一周的访问用户
+     * @return
+     */
+    List<LinkedHashMap<String,Integer>> listUserViewByWeek();
+
+    /**
+     * 获取用户上次登录日志
+     * @param userName
+     * @return
+     */
+    LoginLogVO getLastLoginLog(String userName);
+
 }

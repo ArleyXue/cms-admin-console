@@ -2,4 +2,40 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.arley.cms.console.mapper.LoginLogMapper" >
 
+    <select id="listPageViewByWeek" resultType="java.util.LinkedHashMap">
+        SELECT
+            DATE_FORMAT( login_time, '%Y-%m-%d') as 日期,
+            count(*) as 访问数量
+        FROM
+            login_log
+        WHERE
+            DATE_SUB( CURDATE( ), INTERVAL 7 DAY ) &lt; date( login_time )
+        GROUP BY
+            DATE_FORMAT( login_time, '%Y-%m-%d');
+    </select>
+
+    <select id="listUserViewByWeek" resultType="java.util.LinkedHashMap">
+        SELECT
+            user_name as 用户,
+            count(*) as 访问数量
+        FROM
+            login_log
+        WHERE
+            DATE_SUB( CURDATE( ), INTERVAL 7 DAY ) &lt; date( login_time )
+        GROUP BY
+            user_name;
+    </select>
+
+    <select id="getLastLoginLog" resultType="com.arley.cms.console.pojo.Do.LoginLogDO">
+        SELECT
+            *
+        FROM
+            login_log
+        WHERE
+            user_name = #{userName}
+        and
+            log_type = 1
+        ORDER BY login_time DESC
+        LIMIT 1, 1
+    </select>
 </mapper>

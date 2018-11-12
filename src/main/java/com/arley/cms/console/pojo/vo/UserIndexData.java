@@ -15,6 +15,8 @@ public class UserIndexData {
 
     private String avatar;
 
+    private String lastLoginLocation;
+
     private LocalDateTime lastLoginTime;
 
     private String roleName;
@@ -57,5 +59,13 @@ public class UserIndexData {
 
     public void setRoleName(String roleName) {
         this.roleName = roleName;
+    }
+
+    public String getLastLoginLocation() {
+        return lastLoginLocation;
+    }
+
+    public void setLastLoginLocation(String lastLoginLocation) {
+        this.lastLoginLocation = lastLoginLocation;
     }
 }

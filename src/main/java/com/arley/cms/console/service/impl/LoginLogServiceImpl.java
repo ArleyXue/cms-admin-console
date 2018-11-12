@@ -1,9 +1,11 @@
 package com.arley.cms.console.service.impl;
 
+import com.arley.cms.console.component.MyWebSocket;
 import com.arley.cms.console.mapper.LoginLogMapper;
 import com.arley.cms.console.pojo.Do.LoginLogDO;
 import com.arley.cms.console.pojo.query.LoginLogQuery;
 import com.arley.cms.console.pojo.vo.LoginLogVO;
+import com.arley.cms.console.pojo.vo.WSMessage;
 import com.arley.cms.console.service.LoginLogService;
 import com.arley.cms.console.util.CopyPropertiesUtils;
 import com.arley.cms.console.util.PageUtils;
@@ -17,6 +19,9 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.LinkedHashMap;
+import java.util.List;
 
 /**
  * @author XueXianlei
@@ -35,6 +40,12 @@ public class LoginLogServiceImpl implements LoginLogService {
         LoginLogDO loginLogDO = new LoginLogDO();
         BeanUtils.copyProperties(loginLog, loginLogDO);
         loginLogMapper.insert(loginLogDO);
+
+        // 推送消息
+        WSMessage wsMessage = new WSMessage();
+        wsMessage.setType(1);
+        wsMessage.setMessage(loginLog);
+        MyWebSocket.sendInfo(wsMessage);
     }
 
     @Override
@@ -54,6 +65,27 @@ public class LoginLogServiceImpl implements LoginLogService {
         pagination.setData(CopyPropertiesUtils.convertLoginLogDOToVO(iPage.getRecords()));
         pagination.setTotal(iPage.getTotal());
         return pagination;
+    }
+
+    @Override
+    public List<LinkedHashMap<String, Integer>> listPageViewByWeek() {
+        return loginLogMapper.listPageViewByWeek();
+    }
+
+    @Override
+    public List<LinkedHashMap<String, Integer>> listUserViewByWeek() {
+        return loginLogMapper.listUserViewByWeek();
+    }
+
+    @Override
+    public LoginLogVO getLastLoginLog(String userName) {
+        LoginLogDO loginLogDO = loginLogMapper.getLastLoginLog(userName);
+        if (null == loginLogDO) {
+            return null;
+        }
+        LoginLogVO loginLogVO = new LoginLogVO();
+        BeanUtils.copyProperties(loginLogDO, loginLogVO);
+        return loginLogVO;
     }
 
 }

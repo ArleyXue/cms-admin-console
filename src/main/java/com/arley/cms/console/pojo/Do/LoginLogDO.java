@@ -31,6 +31,16 @@ public class LoginLogDO {
     private String loginIp;
 
     /**
+     * 登录位置
+     */
+    private String loginLocation;
+
+    /**
+     * 日志类型 1-登录 2-退出
+     */
+    private Integer logType;
+
+    /**
      * 登录时间
      */
     private LocalDateTime loginTime;
@@ -64,6 +74,22 @@ public class LoginLogDO {
         this.loginIp = loginIp;
     }
 
+    public String getLoginLocation() {
+        return loginLocation;
+    }
+
+    public void setLoginLocation(String loginLocation) {
+        this.loginLocation = loginLocation;
+    }
+
+    public Integer getLogType() {
+        return logType;
+    }
+
+    public void setLogType(Integer logType) {
+        this.logType = logType;
+    }
+
     public LocalDateTime getLoginTime() {
         return loginTime;
     }
@@ -86,9 +112,9 @@ public class LoginLogDO {
                 "id=" + id +
                 ", userName='" + userName + '\'' +
                 ", loginIp='" + loginIp + '\'' +
+                ", loginLocation='" + loginLocation + '\'' +
                 ", loginTime=" + loginTime +
                 ", content='" + content + '\'' +
                 '}';
     }
-
 }
