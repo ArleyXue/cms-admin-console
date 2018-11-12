@@ -45,17 +45,6 @@ public class SysPermissionServiceImpl implements SysPermissionService {
     }
 
     @Override
-    public SysPermissionVO getPermission(Integer permissionId) {
-        SysPermissionDO sysPermissionDO = sysPermissionMapper.selectById(permissionId);
-        if (null == sysPermissionDO) {
-            return null;
-        }
-        SysPermissionVO sysPermissionVO = new SysPermissionVO();
-        BeanUtils.copyProperties(sysPermissionDO, sysPermissionVO);
-        return sysPermissionVO;
-    }
-
-    @Override
     public List<SysPermissionVO> listPermission() {
         List<SysPermissionDO> sysPermissionDOList = sysPermissionMapper.selectList(new QueryWrapper<SysPermissionDO>().lambda().orderByAsc(SysPermissionDO::getMenuPriority));
         return CopyPropertiesUtils.convertSysPermissionDOToVO(sysPermissionDOList);

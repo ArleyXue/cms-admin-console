@@ -28,13 +28,6 @@ public interface SysRoleService {
     Pagination listRoleByPage(SysRoleQuery roleQuery);
 
     /**
-     * 获取角色
-     * @param roleId
-     * @return
-     */
-    SysRoleVO getRoleById(Integer roleId);
-
-    /**
      * 修改角色
      * @param sysRoleVO
      * @param permissionIds

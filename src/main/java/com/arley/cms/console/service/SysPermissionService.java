@@ -32,13 +32,6 @@ public interface SysPermissionService {
     List<SysPermissionVO> listPermissionByRoleId(Integer roleId);
 
     /**
-     * 获取菜单
-     * @param permissionId
-     * @return
-     */
-    SysPermissionVO getPermission(Integer permissionId);
-
-    /**
      * 获取所有菜单列表
      * @return
      */

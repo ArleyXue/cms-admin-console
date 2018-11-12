@@ -180,17 +180,4 @@ public class SysUserServiceImpl implements SysUserService {
         sysUserMapper.updateById(user);
     }
 
-    @Override
-    public void updateSysUserState(Integer userId, Integer userState) {
-        SysUserDO user = sysUserMapper.selectById(userId);
-        user.setUserState(userState);
-        user.setGmtModified(DateUtils.getLocalDateTime());
-        sysUserMapper.updateById(user);
-    }
-
-    @Override
-    public Integer countSysUser() {
-        return sysUserMapper.selectCount(null);
-    }
-
 }

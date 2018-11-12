@@ -57,6 +57,7 @@ public interface SysUserService {
      * 修改密码
      * @param oldPassword
      * @param newPassword
+     * @param userId
      */
     void updatePassword(String oldPassword, String newPassword, Integer userId);
 
@@ -79,16 +80,4 @@ public interface SysUserService {
      */
     void updateForLogin(Integer userId);
 
-    /**
-     * 修改用户状态
-     * @param userId
-     * @param userState
-     */
-    void updateSysUserState(Integer userId, Integer userState);
-
-    /**
-     * 用户总数
-     * @return
-     */
-    Integer countSysUser();
 }

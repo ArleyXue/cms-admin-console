@@ -77,14 +77,6 @@ public class SysRoleServiceImpl implements SysRoleService {
     }
 
     @Override
-    public SysRoleVO getRoleById(Integer roleId) {
-        SysRoleDO sysRoleDO = sysRoleMapper.selectById(roleId);
-        SysRoleVO sysRoleVO = new SysRoleVO();
-        BeanUtils.copyProperties(sysRoleDO, sysRoleVO);
-        return sysRoleVO;
-    }
-
-    @Override
     public void updateRole(SysRoleVO sysRoleVO, String permissionIds) {
         // 修改角色
         SysRoleDO sysRoleDO = sysRoleMapper.selectById(sysRoleVO.getRoleId());

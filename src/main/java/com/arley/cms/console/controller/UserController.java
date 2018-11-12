@@ -11,11 +11,9 @@ import com.arley.cms.console.service.SysRoleService;
 import com.arley.cms.console.service.SysUserService;
 import com.arley.cms.console.shiro.Encrypt;
 import com.arley.cms.console.util.*;
-import com.baomidou.mybatisplus.extension.api.R;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
