@@ -13,6 +13,7 @@ import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author XueXianlei
@@ -26,7 +27,7 @@ public class MyWebSocket {
     /**
      * 静态变量，用来记录当前在线连接数。应该把它设计成线程安全的。
      */
-    private static int onlineCount = 0;
+    private static AtomicInteger onlineCount = new AtomicInteger(0);
 
     /**
      * concurrent包的线程安全Map，用来存放每个客户端对应的MyWebSocket对象。
@@ -76,7 +77,9 @@ public class MyWebSocket {
 
     /**
      * 收到客户端消息后调用的方法
-     * @param message 客户端发送过来的消息*/
+     * @param message 客户端发送过来的消息
+     * @param session
+     */
     @OnMessage
     public void onMessage(String message, Session session) {
         logger.info("【WebSocket】来自客户端的消息={}", message);
@@ -129,15 +132,15 @@ public class MyWebSocket {
         }
     }
 
-    public static synchronized int getOnlineCount() {
-        return onlineCount;
+    private static int getOnlineCount() {
+        return onlineCount.get();
     }
 
-    public static synchronized void addOnlineCount() {
-        MyWebSocket.onlineCount++;
+    private static void addOnlineCount() {
+        onlineCount.addAndGet(1);
     }
 
-    public static synchronized void subOnlineCount() {
-        MyWebSocket.onlineCount--;
+    private static void subOnlineCount() {
+        onlineCount.decrementAndGet();
     }
 }
